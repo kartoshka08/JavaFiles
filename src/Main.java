@@ -60,53 +60,57 @@ public class Main {
         File save2 = new File("C:\\Users\\Public\\Games\\savegames", "saveGame2.txt");
         File save3 = new File("C:\\Users\\Public\\Games\\savegames", "saveGame3.txt");
 
-        saveGame("C:\\Users\\Public\\Games\\savegames\\saveGame1.txt", game1);
-        saveGame("C:\\Users\\Public\\Games\\savegames\\saveGame2.txt", game2);
-        saveGame("C:\\Users\\Public\\Games\\savegames\\saveGame3.txt", game3);
+        saveGame(save1.getPath(), game1);
+        saveGame(save2.getPath(), game2);
+        saveGame(save3.getPath(), game3);
 
 // 3. Созданные файлы сохранений из папки savegames запаковать в архив zip.
-        File saveZIP = new File("C:\\Users\\Public\\Games\\savegames", "saving.zip");
-        if (saveZIP.isDirectory()) System.out.println("saveZIP added");
+        File saveZIP = new File(savegames, "saving.zip");
+        if (saveZIP.mkdir()) System.out.println("saveZIP added");
 
-        zipFiles("C:\\Users\\Public\\Games\\savegames\\saving.zip",
-                "C:\\Users\\Public\\Games\\savegames\\saveGame1.txt");
+        String[] saveArray = new String[3];
+        saveArray[0] = save1.getPath();
+        saveArray[1] = save2.getPath();
+        saveArray[2] = save3.getPath();
 
-        zipFiles("C:\\Users\\Public\\Games\\savegames\\saving.zip",
-                "C:\\Users\\Public\\Games\\savegames\\saveGame2.txt");
+        zipFiles(saveZIP.getPath(), saveArray);
 
-        zipFiles("C:\\Users\\Public\\Games\\savegames\\saving.zip",
-                "C:\\Users\\Public\\Games\\savegames\\saveGame3.txt");
 
 // 4. Удалить файлы сохранений, лежащие вне архива.
-        if(save1.delete()) System.out.println("save 1 deleted");;
-        save2.delete();
-        save3.delete();
+        if (save1.delete()) System.out.println("save 1 deleted");
+        if (save2.delete()) System.out.println("save 2 deleted");
+        if (save3.delete()) System.out.println("save 3 deleted");
 
     }
 
 
-
-    public static void saveGame(String pathname, GameProgress game){
-        try{
+    public static void saveGame(String pathname, GameProgress game) {
+        try {
             FileOutputStream fos = new FileOutputStream(pathname);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(game);
-        }catch (Exception e){
+            System.out.println("Game saved");
+            oos.close();
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
 
-    public static void zipFiles(String pathOfZip, String pathOfObj){
-        try{
-            ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(pathOfObj));
-            FileInputStream fis = new FileInputStream(pathOfZip);
-            ZipEntry entry = new ZipEntry(pathOfObj);
-            zout.putNextEntry(entry);
-            byte[] buffer = new byte[fis.available()];
-            fis.read(buffer);
-            zout.write(buffer);
-            zout.closeEntry();
-        } catch (Exception e){
+    public static void zipFiles(String pathOfZip, String[] pathOfObj) {
+        try {
+            ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(pathOfZip));
+            for (int i = 0; i < pathOfObj.length; i++) {
+                FileInputStream fis = new FileInputStream(pathOfObj[i]);
+                ZipEntry entry = new ZipEntry("packed_" + pathOfObj[i]);
+                zout.putNextEntry(entry);
+                byte[] buffer = new byte[fis.available()];
+                fis.read(buffer);
+                zout.write(buffer);
+                System.out.println("file delivered to zip");
+                zout.closeEntry();
+            }
+
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
