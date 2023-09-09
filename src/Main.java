@@ -65,15 +65,12 @@ public class Main {
         saveGame(save3.getPath(), game3);
 
 // 3. Созданные файлы сохранений из папки savegames запаковать в архив zip.
-        File saveZIP = new File(savegames, "saving.zip");
-        if (saveZIP.mkdir()) System.out.println("saveZIP added");
-
         String[] saveArray = new String[3];
         saveArray[0] = save1.getPath();
         saveArray[1] = save2.getPath();
         saveArray[2] = save3.getPath();
 
-        zipFiles(saveZIP.getPath(), saveArray);
+        zipFiles("C:\\Users\\Public\\Games\\savegames", saveArray);
 
 
 // 4. Удалить файлы сохранений, лежащие вне архива.
@@ -97,8 +94,7 @@ public class Main {
     }
 
     public static void zipFiles(String pathOfZip, String[] pathOfObj) {
-        try {
-            ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(pathOfZip));
+        try (ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(pathOfZip))) {
             for (int i = 0; i < pathOfObj.length; i++) {
                 FileInputStream fis = new FileInputStream(pathOfObj[i]);
                 ZipEntry entry = new ZipEntry("packed_" + pathOfObj[i]);
@@ -108,8 +104,8 @@ public class Main {
                 zout.write(buffer);
                 System.out.println("file delivered to zip");
                 zout.closeEntry();
+                fis.close();
             }
-
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
